@@ -1,0 +1,20 @@
+# Dependencies
+node_modules/
+.bun/
+
+# Build & Cache outputs
+dist/
+.svelte-kit/
+build/
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# OS & IDE
+.DS_Store
+Thumbs.db
+.vscode/*
+!.vscode/extensions.json
+.idea/

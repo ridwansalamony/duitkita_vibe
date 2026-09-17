@@ -1,0 +1,15 @@
+{
+  "name": "finance-app",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "bun --filter '*' dev",
+    "dev:api": "bun --filter @finance-app/api dev",
+    "dev:web": "bun --filter @finance-app/web dev",
+    "build": "bun --filter '*' build",
+    "check": "bun --filter '*' check"
+  }
+}
