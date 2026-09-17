@@ -58,7 +58,7 @@ export class AuthService {
       name: `${input.name.trim()}'s Household`,
       currency: 'IDR',
       timezone: 'Asia/Jakarta',
-      ownerId: userId,
+      members: [{ userId, role: 'owner' }],
       settings: {
         startOfMonth: 1
       },

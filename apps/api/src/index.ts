@@ -5,6 +5,7 @@ import { HTTP_STATUS, TRANSACTION_CATEGORIES } from '@finance-app/constants';
 import { isValidEmail } from '@finance-app/validation';
 import { authRoutes } from './routes/auth.routes';
 import { householdRoutes } from './routes/household.routes';
+import { invitationRoutes } from './routes/invitation.routes';
 import { errorResponse, successResponse } from './utils/response.util';
 import { AuthError } from './middlewares/auth.middleware';
 
@@ -54,7 +55,7 @@ const app = new Elysia()
       'Service is healthy'
     )
   )
-  .group('/api', (api) => api.use(authRoutes).use(householdRoutes))
+  .group('/api', (api) => api.use(authRoutes).use(householdRoutes).use(invitationRoutes))
   .group('/api/v1', (api) =>
     api
       .get('/categories', (): ApiResponse<readonly string[]> => ({

@@ -1,30 +1,31 @@
-import { ObjectId } from 'mongodb';
-import { getDatabase } from '../config/db';
+﻿import { ObjectId } from "mongodb";
+import { getDatabase } from "../config/db";
 import type {
   HouseholdDocument,
   CreateHouseholdInput,
   UpdateHouseholdInput
-} from '../models/household.model';
+} from "../models/household.model";
 
 export class HouseholdService {
   private static async getCollection() {
     const db = await getDatabase();
-    return db.collection<HouseholdDocument>('households');
+    return db.collection<HouseholdDocument>("households");
   }
 
   static async createHousehold(ownerId: string, input: CreateHouseholdInput) {
     if (!ObjectId.isValid(ownerId)) {
-      throw new Error('Invalid owner ID');
+      throw new Error("Invalid owner ID");
     }
 
     const households = await this.getCollection();
     const now = new Date();
+    const ownerObjectId = new ObjectId(ownerId);
 
     const newHousehold: HouseholdDocument = {
       name: input.name.trim(),
-      currency: (input.currency?.trim() || 'IDR').toUpperCase(),
-      timezone: input.timezone?.trim() || 'Asia/Jakarta',
-      ownerId: new ObjectId(ownerId),
+      currency: (input.currency?.trim() || "IDR").toUpperCase(),
+      timezone: input.timezone?.trim() || "Asia/Jakarta",
+      members: [{ userId: ownerObjectId, role: "owner" }],
       settings: {
         startOfMonth: input.settings?.startOfMonth ?? 1,
         defaultAccountId: input.settings?.defaultAccountId,
@@ -43,29 +44,29 @@ export class HouseholdService {
 
   static async getHouseholdsByUser(userId: string) {
     if (!ObjectId.isValid(userId)) {
-      throw new Error('Invalid user ID');
+      throw new Error("Invalid user ID");
     }
 
     const households = await this.getCollection();
     return await households
-      .find({ ownerId: new ObjectId(userId) })
+      .find({ "members.userId": new ObjectId(userId) })
       .sort({ createdAt: -1 })
       .toArray();
   }
 
   static async getHouseholdById(householdId: string, userId: string) {
     if (!ObjectId.isValid(householdId) || !ObjectId.isValid(userId)) {
-      throw new Error('Invalid ID format');
+      throw new Error("Invalid ID format");
     }
 
     const households = await this.getCollection();
     const household = await households.findOne({
       _id: new ObjectId(householdId),
-      ownerId: new ObjectId(userId)
+      "members.userId": new ObjectId(userId)
     });
 
     if (!household) {
-      throw new Error('Household not found or access denied');
+      throw new Error("Household not found or access denied");
     }
 
     return household;
@@ -77,7 +78,7 @@ export class HouseholdService {
     input: UpdateHouseholdInput
   ) {
     if (!ObjectId.isValid(householdId) || !ObjectId.isValid(userId)) {
-      throw new Error('Invalid ID format');
+      throw new Error("Invalid ID format");
     }
 
     const households = await this.getCollection();
@@ -101,14 +102,14 @@ export class HouseholdService {
     const result = await households.findOneAndUpdate(
       {
         _id: new ObjectId(householdId),
-        ownerId: new ObjectId(userId)
+        members: { $elemMatch: { userId: new ObjectId(userId), role: "owner" } }
       },
       { $set: updateData },
-      { returnDocument: 'after' }
+      { returnDocument: "after" }
     );
 
     if (!result) {
-      throw new Error('Household not found or access denied');
+      throw new Error("Household not found or access denied");
     }
 
     return result;
@@ -116,19 +117,19 @@ export class HouseholdService {
 
   static async deleteHousehold(householdId: string, userId: string) {
     if (!ObjectId.isValid(householdId) || !ObjectId.isValid(userId)) {
-      throw new Error('Invalid ID format');
+      throw new Error("Invalid ID format");
     }
 
     const households = await this.getCollection();
     const result = await households.deleteOne({
       _id: new ObjectId(householdId),
-      ownerId: new ObjectId(userId)
+      members: { $elemMatch: { userId: new ObjectId(userId), role: "owner" } }
     });
 
     if (result.deletedCount === 0) {
-      throw new Error('Household not found or access denied');
+      throw new Error("Household not found or access denied");
     }
 
-    return { message: 'Household deleted successfully' };
+    return { message: "Household deleted successfully" };
   }
 }

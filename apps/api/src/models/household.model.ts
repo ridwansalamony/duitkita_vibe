@@ -7,12 +7,17 @@ export interface HouseholdSettings {
   defaultCategoryId?: ObjectId | string;
 }
 
+export interface HouseholdMember {
+  userId: ObjectId;
+  role: 'owner' | 'member';
+}
+
 export interface HouseholdDocument {
   _id?: ObjectId;
   name: string;
   currency: string;
   timezone: string;
-  ownerId: ObjectId;
+  members: HouseholdMember[];
   settings: HouseholdSettings;
   createdAt: Date;
   updatedAt: Date;
